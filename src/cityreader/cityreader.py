@@ -14,6 +14,18 @@
 #
 # Note that the first line of the CSV is header that describes the fields--this
 # should not be loaded into a City object.
+
+import csv
+
+class City:
+  def __init__(self, name, lat, lon):
+    self.name = name
+    self.lat = float(lat)
+    self.lon = float(lon)
+
+  def __str__(self):
+    return f"City: {self.name}, Lat:{self.lat}, Lon:{self.lon}"
+
 cities = []
 
 def cityreader(cities=[]):
@@ -21,7 +33,12 @@ def cityreader(cities=[]):
   # Ensure that the lat and lon valuse are all floats
   # For each city record, create a new City instance and add it to the 
   # `cities` list
-    
+
+  with open('src/cityreader/cities.csv', newline = '') as f:
+    f = csv.reader(f, delimiter = ",", quotechar='"')
+    next(f)
+    for row in f:
+      cities.append(City(name = row[0], lat = row[3], lon = row[4]))
     return cities
 
 cityreader(cities)
@@ -59,13 +76,49 @@ for c in cities:
 # Tucson: (32.1558,-110.8777)
 # Salt Lake City: (40.7774,-111.9301)
 
-# TODO Get latitude and longitude values from the user
 
 def cityreader_stretch(lat1, lon1, lat2, lon2, cities=[]):
   # within will hold the cities that fall within the specified region
   within = []
-  
-  # Go through each city and check to see if it falls within 
-  # the specified coordinates.
 
+  # Upper left and lower right coordinate square logic
+
+  if lat1 >= lat2 and lon1 <= lon2:
+    ul = (lat1, lon1)
+    lr = (lat2, lon2)
+
+  elif lat1 >= lat2 and lon1 >= lon2:
+    ul = (lat2, lon2)
+    lr = (lat1, lon1)
+
+  elif lat1 <= lat2 and lon1 >= lon2:
+    ul = (lat2, lon2)
+    lr = (lat1, lon1)
+
+  else:
+    ul = (lat1, lon1)
+    lr = (lat2, lon2)
+
+  # Go through each city and check to see if it falls within the specified coordinates.
+
+  for city in cities:
+    if ul[0] <= city.lat and lr[0] >= city.lat and ul[1] <= city.lon and lr[1] >= city.lon:
+      within.append(city)
+      
   return within
+
+# Get latitude and longitude values from the user
+
+print("\nInput two points, each specified by latitude and longitude. These points form the corners of a lat/lon square. The function will return which cities are within the lat/lon square.\n Example input: lat1: 32, lon1: -120, lat2: 45, lon2: -100")
+
+lat1 = input("lat1: ")
+lon1 = input("lon1: ")
+lat2 = input("lat2: ")
+lon2 = input("lon2: ")
+
+# Print the cities within the coordinates
+
+within = cityreader_stretch(float(lat1), float(lon1), float(lat2), float(lon2), cities)
+
+for c in within:
+    print(c)
